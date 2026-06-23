@@ -4,7 +4,7 @@ const validator = require('validator');
 
 exports.createShortUrl = async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url, customAlias, expiresAt } = req.body;
 
     if (!url) {
       return res.status(400).json({
@@ -12,7 +12,25 @@ exports.createShortUrl = async (req, res) => {
       });
     }
 
-    const shortCode = nanoid(6);
+    if (!validator.isURL(url)) {
+      return res.status(400).json({
+        message: 'Please enter a valid URL'
+      });
+    }
+
+    const shortCode = customAlias || nanoid(6);
+
+    const existingAlias = await Url.findOne({
+      where: {
+        short_code: shortCode
+      }
+    });
+
+    if (existingAlias) {
+      return res.status(400).json({
+        message: 'Custom Alias Already Exists'
+      });
+    }
 
     const existingUrl = await Url.findOne({
       where: {
@@ -29,7 +47,8 @@ exports.createShortUrl = async (req, res) => {
     } else {
       const savedUrl = await Url.create({
         original_url: url,
-        short_code: shortCode
+        short_code: shortCode,
+        expires_at: expiresAt
       });
 
       res.status(201).json({
@@ -47,6 +66,31 @@ exports.createShortUrl = async (req, res) => {
       message: 'Internal Server Error'
     });
   }
+};
+
+exports.getAnalytics = async (req, res) => {
+
+  const { shortCode } = req.params;
+
+  const url = await Url.findOne({
+    where: {
+      short_code: shortCode
+    }
+  });
+
+  if (!url) {
+    return res.status(404).json({
+      message: 'URL not found'
+    })
+  }
+
+  res.json({
+    originalUrl: url.original_url,
+    shortCode: url.short_code,
+    clicks: url.clicks,
+    createdAt: url.createdAt
+  });
+
 };
 
 exports.redirectUrl = async (req, res) => {
@@ -67,12 +111,17 @@ exports.redirectUrl = async (req, res) => {
       });
     }
 
+    if (url.expires_at < new Date()) {
+      return res.status(410).json({
+        message: 'URL is expired'
+      });
+    }
+
     await url.increment('clicks');
 
     return res.redirect(
       url.original_url
     );
-
   } catch (error) {
 
     console.error(error);

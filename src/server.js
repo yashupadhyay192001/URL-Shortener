@@ -8,7 +8,15 @@ require('./models/Url');
 
 const urlRoutes = require('./routes/routes');
 
+const errorHandler = require('./middlewares/errorHandler');
+
 const app = express();
+
+const morgan = require('morgan');
+
+app.use(morgan('dev'));
+
+app.use(errorHandler);
 
 app.use(express.json());
 
@@ -26,7 +34,7 @@ const startServer = async () => {
       'Database connected'
     );
 
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
 
     console.log(
       'Models synced'

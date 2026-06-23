@@ -4,7 +4,8 @@ const router = express.Router();
 
 const {
   createShortUrl,
-  redirectUrl
+  redirectUrl,
+  getAnalytics
 } = require('../controllers/urlController');
 
 router.post(
@@ -15,6 +16,11 @@ router.post(
 router.get(
   '/:shortCode',
   redirectUrl
+);
+
+router.get(
+  '/analytics/:shortCode',
+  getAnalytics
 );
 
 module.exports = router;

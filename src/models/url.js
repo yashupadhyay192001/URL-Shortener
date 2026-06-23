@@ -25,11 +25,16 @@ const Url = sequelize.define(
     clicks: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+
+    expires_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   },
   {
     tableName: 'urls',
-    underscored: true
+    underscored: true,
   }
 );
 
