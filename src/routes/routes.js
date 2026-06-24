@@ -7,9 +7,11 @@ const {
   redirectUrl,
   getAnalytics
 } = require('../controllers/urlController');
+const urlValidator = require('../validators/urlValidator');
 
 router.post(
   '/shorten',
+  urlValidator,
   createShortUrl
 );
 
