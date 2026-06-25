@@ -16,6 +16,7 @@
     "morgan": "^1.11.0",
     "nanoid": "^5.1.15",
     "pg": "^8.22.0",
+    "redis": "^6.0.1",
     "sequelize": "^6.37.8",
     "swagger-ui-express": "^5.0.1",
     "validator": "^13.15.35"

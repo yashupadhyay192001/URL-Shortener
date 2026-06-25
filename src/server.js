@@ -10,6 +10,8 @@ const urlRoutes = require('./routes/routes');
 
 const errorHandler = require('./middlewares/errorHandler');
 
+const redisClient = require("./config/redis");
+
 const app = express();
 
 const morgan = require('morgan');
@@ -28,6 +30,7 @@ const startServer = async () => {
 
   try {
 
+
     await sequelize.authenticate();
 
     console.log(
@@ -38,6 +41,12 @@ const startServer = async () => {
 
     console.log(
       'Models synced'
+    );
+
+    await redisClient.connect();
+
+    console.log(
+      "Redis connected"
     );
 
     app.listen(PORT, () => {
