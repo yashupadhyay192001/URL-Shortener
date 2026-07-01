@@ -1,4 +1,5 @@
 const { nanoid } = require("nanoid");
+const cacheService = require("./cacheService");
 
 const urlRepository = require(
   "../repositories/urlRepository"
@@ -29,6 +30,17 @@ exports.getOriginalUrl = async (
   shortCode
 ) => {
 
+  const cached = await cacheService.get(
+    shortCode
+  );
+
+  if (cached) {
+    console.log("CACHE HIT");
+    return JSON.parse(cached);
+  }
+
+  console.log("CACHE MISS");
+
   const url =
     await urlRepository.findByShortCode(
       shortCode
@@ -39,6 +51,11 @@ exports.getOriginalUrl = async (
       "URL_NOT_FOUND"
     );
   }
+
+  await cacheService.set(
+    shortCode,
+    url.original_url
+  )
 
   await url.increment("clicks");
 
